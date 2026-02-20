@@ -35,7 +35,7 @@ tema <- create_theme(
     submenu_hover_color = "#FFF"
   ),
   bs4dash_status(
-    primary = "#5E81AC", danger = "#BF616A", light = "#272c30"
+    primary = "#4682B4", danger = "#B22222", light = "#272c30"
   )
 )
 
@@ -213,8 +213,8 @@ server <- function(input, output) {
       select(-c(tanggal_date, `LINK SURAT`, `JAM DEADLINE`)) |> # Hapus kolom bantuan jika tidak diperlukan
       relocate(`HARI H DEADLINE`, .after = 8) |> # Meletakkan kolom H di posisi ke-4 (setelah kolom ke-3)
       mutate(
-        TINDAKLANJUT_COLS = case_when(TINDAKLANJUT == "SELESAI" ~ "#5E81AC",
-                                      TRUE ~ "#BF616A")
+        TINDAKLANJUT_COLS = case_when(TINDAKLANJUT == "SELESAI" ~ "#4682B4",
+                                      TRUE ~ "#B22222")
       )
 
     return(permintaan_data)
@@ -315,7 +315,7 @@ server <- function(input, output) {
     
     tindaklanjut_level <- c("SELESAI", "BELUM SELESAI")
     kostum_warna <- c(
-      "SELESAI" = "#008000",          # Hijau Muda
+      "SELESAI" = "#4682B4",          # Hijau Muda
       "BELUM SELESAI" = "#B22222"  # Oranye
     )
     # Pilih warna yang relevan berdasarkan data yang difilter
