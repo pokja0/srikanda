@@ -12,6 +12,7 @@ library(reactablefmtr)
 library(tidyr)
 library(bslib)
 library(echarts4r)
+library(fresh)
 
 tema <- create_theme(
   bs4dash_status(light = "#272c30"),
@@ -42,7 +43,6 @@ tema <- create_theme(
 ui <- dashboardPage(
   preloader = list(html = tagList(spin_1(), "Loading ..."), color = "#343a40"),
   dashboardHeader(
-    use_googlefont("roboto"),
     title = "Permintaan Data & Zoom"
   ),
   dashboardSidebar(
