@@ -1,181 +1,331 @@
-library(bs4Dash)
+# app.R
+library(shiny)
+library(bslib)
 library(dplyr)
 library(fst)
 library(reactable)
-library(googlesheets4)
-library(waiter)
-library(bslib)
-library(bsicons)
-library(writexl) 
-library(lubridate)
+library(scales)
 library(reactablefmtr)
-library(tidyr)
-library(bslib)
+library(htmltools)
 library(echarts4r)
-library(fresh)
+library(bsicons)
+library(googlesheets4)
+library(lubridate)
+library(writexl) 
 
-tema <- create_theme(
-  bs4dash_status(light = "#272c30"),
-  
-  bs4dash_vars(
-    navbar_light_color = "#bec5cb",
-    navbar_light_active_color = "#bec5cb",
-    navbar_light_hover_color = "#bec5cb"
-  ),
-  bs4dash_yiq(
-    contrasted_threshold = 10,
-    text_dark = "#FFF", 
-    text_light = "#272c30"
-  ),
-  bs4dash_sidebar_light(
-    color = "#bec5cb",
-    hover_color = "#FFF",
-    submenu_bg = "#272c30", 
-    submenu_color = "#FFF", 
-    submenu_hover_color = "#FFF"
-  ),
-  bs4dash_status(
-    primary = "#4682B4", danger = "#B22222", light = "#272c30"
-  )
+srikandi_surat <- read.fst("data/srikandi_surat.fst")
+srikandi_pegawai <- read.fst("data/srikandi_pegawai.fst")
+
+# Tema kustom (opsional)
+my_theme <- bs_theme(
+  bootswatch = "cosmo",  # bisa diganti: "darkly", "cosmo", dll.
 )
 
-# Define UI for application that draws a histogram
-ui <- dashboardPage(
-  preloader = list(html = tagList(spin_1(), "Loading ..."), color = "#343a40"),
-  dashboardHeader(
-    title = "Permintaan Data & Zoom"
-  ),
-  dashboardSidebar(
-    sidebarMenu(
-      id = "sidebarMenu",
-      menuItem(
-        text = "Daftar Pemintaan Data",
-        tabName = "tab1"
-      )#,
-      # menuItem(
-      #   text = "Daftar Zoom",
-      #   tabName = "tab2"
-      # )
-    )
-  ),
-  dashboardBody(
-    use_theme(tema),
-    tabItems(
-      tabItem(
-        tabName = "tab1",
-        # Boxes need to be put in a row (or column)
-        h2("Daftar Permintaan Data", style="text-align: center;"),
-        br(),
-        fluidRow(
-          column(
-            4,
-            value_box( 
-              title = "Jumlah Permintaan Data", 
-              textOutput("jumlah_permintaan_data"),
-              showcase = bs_icon("people-fill"),
-              theme = "primary"
-            )
-          ),
-          column(
-            4,
-            value_box( 
-              title = "Telah Ditindaklanjuti", 
-              textOutput("jumlah_tl_pm"),  
-              showcase = bs_icon("emoji-heart-eyes-fill"),
-              theme = "primary" 
-            )
-          ),
-          column(
-            4,
-            value_box( 
-              title = "Belum Ditindaklanjuti", 
-              textOutput("jumlah_belum_tl_pm"),  
-              showcase = bs_icon("emoji-tear-fill"),
-              theme = "danger" 
-            )
-          )
-        ),
-        tabsetPanel(
-          tabPanel(
-            "Tabel",
-            br(),
-            downloadButton("download_excel_pd", "Download Excel"),
-            card(
-              reactableOutput("tabel_permintaan_data")
-            )
-          ),
-          tabPanel(
-            "Grafik",
-            card(full_screen = T,
-                 echarts4rOutput("grafik_pd")
-            )
-          )
-        )
+
+ui <- page_navbar(
+  fillable = F,
+  title = "Dashboard Rekap Srikandi",
+  theme = my_theme,
+  
+  # Menu pertama
+  nav_panel(
+    title = "Menu Pegawai",
+    layout_columns(
+      #col_widths = c(2, 2, 2),  # tiga kolom sama lebar
+      value_box(
+        title = "Jumlah Surat Terdisposisi",
+        value = textOutput("jumlah_surat_terdisposisi"),
+        showcase = bsicons::bs_icon("envelope-at"),
+        theme = "primary"
       ),
-      tabItem(
-        tabName = "tab2",
-        h2("Status Pengiriman Bukti Dukung SPT25 - PKB/PLKB", style="text-align: center;"),
-        br(),
-        fluidRow(
-          column(
-            3,
-            value_box( 
-              title = "Jumlah ASN PKB/PLKB", 
-              "413",
-              showcase = bs_icon("people"),
-              theme = "bg-gradient-indigo-purple",
-              p("Sumber: SIMSDM 30 Januari 2026")
-            )
+      value_box(
+        title = "Pengumpulan Data",
+        value = textOutput("tanggal_scraping"),
+        showcase = bsicons::bs_icon("calendar3"),
+        theme = value_box_theme(bg = "#f4de79", fg = "black")
+      ),
+      value_box(
+        title = "% Pegawai Membaca Surat",
+        value = textOutput("surat_terbaca"),
+        showcase = bsicons::bs_icon("envelope-paper"),
+        theme = "primary"
+      ),
+      value_box(
+        title = "% Pegawai Menindaklanjuti",
+        value = textOutput("surat_ditl"),
+        showcase = bsicons::bs_icon("envelope-check"),
+        theme = value_box_theme(bg = "#f4de79", fg = "black")
+      )
+    ),
+    # Tambahan konten bisa diletakkan di sini
+    navset_card_underline(
+      full_screen = F,
+      title = "Klik ✔ ",
+      nav_panel(
+        "Tabel",
+        # card_title("Tabel Rekap Aktivitas Srikandi Pegawai"),
+        h1("Tabel Rekap Aktivitas Srikandi Pegawai", style="text-align: center;"),
+        h6("Sumber Data: srikandi.arsip.go.id (diakses tanggal 28 Februari 2026)", style="text-align: center;"),
+        layout_columns(
+          col_widths = 2,
+          downloadButton("download_excel_srikandi_pegawai", "Download Excel")
+        ),
+        reactableOutput("skor_srikandi_pegawai")
+      ),
+      nav_panel(
+        "Grafik",
+        layout_columns(
+          card(full_screen = T,
+               echarts4rOutput("histogram_baca")
           ),
-          column(
-            3,
-            value_box( 
-              title = "Sudah Mengirim", 
-              textOutput("pkb_sudah"),  
-              showcase = bs_icon("emoji-heart-eyes"),
-              theme = "bg-gradient-indigo-purple" ,
-              
-            )
-          ),
-          column(
-            3,
-            value_box( 
-              title = "Belum Mengirim", 
-              textOutput("pkb_belum"),  
-              showcase = bs_icon("emoji-tear"),
-              theme = "bg-gradient-indigo-purple" 
-            )
-          ),
-          column(
-            3,
-            value_box(
-              title = "Sisa Hari Hingga Batas Waktu",
-              value = textOutput("sisa_hari_pkb"),
-              showcase = bs_icon("calendar-week"),
-              theme = "primary",
-              p("Batas akhir: 28 Februari 2026"),
-              p("Nota Dinas Kepala Perwakilan")
-            )
+          card(full_screen = T,
+               echarts4rOutput("histogram_tl")
           )
         ),
-        br(),
-        h2("text"),
-        downloadButton("download_excel_penyuluh", "Download Excel"),
-        card(
-          reactableOutput("tabel_penyuluh")
+        layout_columns(
+          card(
+            full_screen = T,
+            echarts4rOutput("scatter_plot")
+          )
         )
       )
     )
+  ),
+  
+  # Menu kedua
+  nav_panel(
+    title = "Menu Permintaan Data",
+    h2("Daftar Permintaan Data", style="text-align: center;"),
+    br(),
+    fluidRow(
+      column(
+        4,
+        value_box( 
+          title = "Jumlah Permintaan Data", 
+          textOutput("jumlah_permintaan_data"),
+          showcase = bs_icon("people-fill"),
+          theme = "primary"
+        )
+      ),
+      column(
+        4,
+        value_box( 
+          title = "Telah Ditindaklanjuti", 
+          textOutput("jumlah_tl_pm"),  
+          showcase = bs_icon("emoji-heart-eyes-fill"),
+          theme = "primary" 
+        )
+      ),
+      column(
+        4,
+        value_box( 
+          title = "Belum Ditindaklanjuti", 
+          textOutput("jumlah_belum_tl_pm"),  
+          showcase = bs_icon("emoji-tear-fill"),
+          theme = "danger" 
+        )
+      )
+    ),
+    navset_card_underline(
+      title = "Klik ✔ ",
+      nav_panel(
+        "Tabel",
+        br(),
+        layout_columns(
+          col_widths = 2,
+          downloadButton("download_excel_pd", "Download Excel")
+        ),
+        card(
+          reactableOutput("tabel_permintaan_data")
+        )
+      ),
+      nav_panel(
+        "Grafik",
+        card(full_screen = T,
+             echarts4rOutput("grafik_pd")
+        )
+      ),
+    )
   )
 )
 
-# Define server logic required to draw a histogram
-server <- function(input, output) {
+server <- function(input, output, session) {
   
-  observeEvent(input$reload, {
-    session$reload()
+  # Data dummy (bisa diganti dengan data nyata)
+  output$jumlah_surat_terdisposisi <- renderText({ 
+    comma(
+      length(unique(srikandi_surat$`Nomor Naskah`)),
+      big.mark = ".",
+      decimal.mark = ","
+    )
+  })
+  output$tanggal_scraping <- renderText({ "28 Februari 2026"})
+  
+  output$surat_terbaca <- renderText({ 
+    paste0(comma(
+      median(srikandi_pegawai$`Persen Baca`),
+      big.mark = ".",
+      decimal.mark = ","
+    ), "%")
   })
   
+  output$surat_ditl <- renderText({ 
+    paste0(comma(
+      median(srikandi_pegawai$`Persen Tindaklanjut`),
+      big.mark = ".",
+      decimal.mark = ","
+    ), "%")
+  })
+  
+  # Plot dummy
+  output$skor_srikandi_pegawai <- renderReactable({
+    reactable(
+      srikandi_pegawai,
+      defaultColDef = colDef(
+        align = "center"
+      ),
+      columns = list(
+        Nama = colDef(align = "left"),
+        NIP = colDef(align = "left"),
+        `Jumlah Sudah Baca` = colDef(name = "Sudah"),
+        `Jumlah Belum Baca` = colDef(name = "Belum"),
+        `Persen Baca` = colDef(name = "Persentase (%)", 
+                               style = color_scales(srikandi_pegawai, colors = c("#F44336", "#4CAF50")), 
+                               format = colFormat(suffix = "%")),
+        #`Persen Belum Baca` = colDef(name = "% Belum", style = color_scales(srikandi_pegawai)),
+        `Jumlah Sudah Tindaklanjut` = colDef(name = "Sudah"),
+        `Jumlah Belum Tindaklanjut` = colDef(name = "Belum"),
+        `Persen Tindaklanjut` = colDef(name = "Persentase (%)",
+                                       style = color_scales(srikandi_pegawai, colors = c("#F44336", "#4CAF50")), 
+                                       format = colFormat(suffix = "%"))
+        #`Persen Belum Tindaklanjut` = colDef(name = "% Belum")
+      ),
+      columnGroups = list(
+        colGroup(name = "Baca Surat", columns = c("Jumlah Sudah Baca", "Jumlah Belum Baca", "Persen Baca")),
+        colGroup(name = "Tindaklanjut Surat", columns = c("Jumlah Sudah Tindaklanjut", "Jumlah Belum Tindaklanjut", "Persen Tindaklanjut"))
+      ),
+      bordered = TRUE, striped = TRUE, highlight = TRUE,searchable = T,
+      theme = reactableTheme(
+        highlightColor = "#99ccff"  # Biru muda untuk hover
+      )
+    ) 
+  })
+  
+  output$download_excel_srikandi_pegawai <- downloadHandler(
+    
+    
+    filename = function() {
+      paste("skor-srikandi-", Sys.Date(), ".xlsx", sep = "")
+    },
+    content = function(file) {
+      write_xlsx(srikandi_pegawai, file)
+    }
+  )
+  
+  output$histogram_baca <- renderEcharts4r({
+    #df_final_srikandi = df_final_srikandi
+    # Membuat histogram
+    srikandi_pegawai |>
+      e_charts() |>
+      e_histogram(`Persen Baca`, name = "Frekuensi") |>
+      e_title("Histogram Persen Baca", "Distribusi Data") |>
+      e_x_axis(name = "Persen Baca") |>
+      e_y_axis(name = "Jumlah Pegawai") |>
+      e_tooltip(trigger = "axis") |>
+      e_legend(show = FALSE)
+  })
+  
+  output$histogram_tl <- renderEcharts4r({
+    # Membuat histogram
+    #df_final_srikandi = df_final_srikandi
+    srikandi_pegawai |>
+      e_charts() |>
+      e_histogram(`Persen Tindaklanjut`, name = "Frekuensi") |>
+      e_title("Histogram Persen Tindaklanjut", "Distribusi Data") |>
+      e_x_axis(name = "Persen Tindaklanjut") |>
+      e_y_axis(name = "Jumlah Pegawai") |>
+      e_tooltip(trigger = "axis") |>
+      e_legend(show = FALSE)
+  })
+  
+  output$scatter_plot <- renderEcharts4r({
+    median_surat = median(srikandi_pegawai$`Jumlah Surat Masuk`)
+    median_skor <- median(srikandi_pegawai$`Skor Aktivitas Srikandi`)
+    
+    min_surat = min(srikandi_pegawai$`Jumlah Surat Masuk`) * 0.90
+    min_skor <- min(srikandi_pegawai$`Skor Aktivitas Srikandi`) * 0.9
+    
+    max_surat = max(srikandi_pegawai$`Jumlah Surat Masuk`) * 1.1
+    max_skor <- max(srikandi_pegawai$`Skor Aktivitas Srikandi`) * 1.1
+    
+    data_scatter = srikandi_pegawai |>
+      select(Nama, `Jumlah Surat Masuk`, `Skor Aktivitas Srikandi`) |>
+      mutate(Kuadran = case_when(
+        `Jumlah Surat Masuk` >= median_surat & `Skor Aktivitas Srikandi` >= median_skor ~ "Kuadran I",
+        `Jumlah Surat Masuk` < median_surat & `Skor Aktivitas Srikandi` >= median_skor ~ "Kuadran II",
+        `Jumlah Surat Masuk` < median_surat & `Skor Aktivitas Srikandi` < median_skor ~ "Kuadran III",
+        `Jumlah Surat Masuk` >= median_surat & `Skor Aktivitas Srikandi` < median_skor ~ "Kuadran IV"
+      ))
+    
+    # Membuat scatter plot dengan garis di 50 dan warna per kuadran
+    data_scatter |>
+      echarts4r::group_by(Kuadran) %>% 
+      e_charts(`Jumlah Surat Masuk`) |>
+      e_scatter(
+        serie = `Skor Aktivitas Srikandi`,
+        symbol_size = 12,
+        # name = "Data",
+        bind = Nama  # Menambahkan bind agar nama muncul di tooltip
+      ) |>
+      e_color(
+        c("#66BB6A", "#42A5F5", "#EF5350", "#FFA726")
+      ) |>
+      e_x_axis(
+        name = "Surat Masuk",
+        min = round(min_surat),
+        max = round(max_surat),
+        axisLine = list(onZero = FALSE), # Memaksa sumbu X tetap di bawah
+        nameLocation = "middle",         # Mengatur posisi judul sumbu di tengah
+        nameGap = 35                     # Memberi jarak antara judul dan angka sumbu
+      ) |>
+      e_y_axis(
+        name = "Skor Aktivitas Srikandi",
+        min = round(min_skor),
+        max = round(max_skor),
+        axisLine = list(onZero = FALSE), # Mencegah sumbu Y bergeser ke tengah jika ada X negatif
+        nameGap = 10
+      )|>
+      # Menambahkan garis vertikal di 50
+      e_mark_line(
+        data = list(xAxis = median_surat),
+        title = "",
+        lineStyle = list(color = "gray", type = "dashed", width = 2)
+      ) |>
+      # Menambahkan garis horizontal di 50  
+      e_mark_line(
+        data = list(yAxis = median_skor),
+        title = "",
+        lineStyle = list(color = "gray", type = "dashed", width = 2)
+      ) |>
+      e_tooltip(
+        trigger = "item",
+        formatter = htmlwidgets::JS("
+      function(params){
+        return(
+          '<b>' + params.name + '</b><br/>' + 
+          'Surat Masuk: ' + params.value[0] + '<br/>' + 
+          'Skor: ' + params.value[1]
+        )
+      }
+    ")
+      ) |>
+      e_title("Grafik Perbandingan Jumlah Surat Masuk dan Skor Aktivitas Srikandi") |>
+      e_legend(show = T) |>  # Legend dimatikan dulu karena grouping bermasalah
+      e_grid(containLabel = TRUE, left = "15%", right = "10%")
+    
+  })
+  
+  #### permintaan data
   permintaan_data <- reactive({
     gs4_deauth()
     # Baca dengan spesifikasi tipe kolom
@@ -216,7 +366,7 @@ server <- function(input, output) {
         TINDAKLANJUT_COLS = case_when(TINDAKLANJUT == "SELESAI" ~ "#4682B4",
                                       TRUE ~ "#B22222")
       )
-
+    
     return(permintaan_data)
   })
   
@@ -240,11 +390,11 @@ server <- function(input, output) {
     permintaan_data() |>
       filter(TINDAKLANJUT != "SELESAI") |>
       distinct(`NOMOR NASKAH`) |>
-    nrow()
+      nrow()
   })
   
   output$tabel_permintaan_data <- renderReactable({
-
+    
     permintaan_data = permintaan_data()
     reactable(permintaan_data, 
               filterable = TRUE, 
@@ -261,15 +411,15 @@ server <- function(input, output) {
               ),
               theme = fivethirtyeight(),
               defaultColDef = colDef(minWidth = 120, align = "left")
-,
-             # pagination = F,
+              ,
+              # pagination = F,
               # virtual = TRUE,
-           
+              
               showPagination = TRUE#,
               # rowStyle = function(index) {
               #   if (permintaan_data[index, "TINDAKLANJUT"] == "ON PROSES") list(background = "rgb(255, 153, 153)")
               # }
-             )
+    )
   })
   
   output$download_excel_pd <- downloadHandler(
@@ -342,8 +492,6 @@ server <- function(input, output) {
     
   })
   
-  
 }
 
-# Run the application 
-shinyApp(ui = ui, server = server)
+shinyApp(ui, server)
