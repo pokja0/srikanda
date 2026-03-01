@@ -227,8 +227,8 @@ server <- function(input, output, session) {
     # Membuat histogram
     srikandi_pegawai |>
       e_charts() |>
-      e_histogram(`Persen Baca`, name = "Frekuensi") |>
-      e_title("Histogram Persen Baca", "Distribusi Data") |>
+      e_histogram(`Persen Baca`, name = "Jumlah Pegawai") |>
+      e_title("Histogram Persen Baca", "") |>
       e_x_axis(name = "Persen Baca") |>
       e_y_axis(name = "Jumlah Pegawai") |>
       e_tooltip(trigger = "axis") |>
@@ -240,8 +240,8 @@ server <- function(input, output, session) {
     #df_final_srikandi = df_final_srikandi
     srikandi_pegawai |>
       e_charts() |>
-      e_histogram(`Persen Tindaklanjut`, name = "Frekuensi") |>
-      e_title("Histogram Persen Tindaklanjut", "Distribusi Data") |>
+      e_histogram(`Persen Tindaklanjut`, name = "Jumlah Pegawai") |>
+      e_title("Histogram Persen Tindaklanjut", "") |>
       e_x_axis(name = "Persen Tindaklanjut") |>
       e_y_axis(name = "Jumlah Pegawai") |>
       e_tooltip(trigger = "axis") |>
