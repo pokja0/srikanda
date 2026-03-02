@@ -12,6 +12,7 @@ library(bsicons)
 library(googlesheets4)
 library(lubridate)
 library(writexl) 
+library(tidyr)
 
 srikandi_surat <- read.fst("data/srikandi_surat.fst")
 srikandi_pegawai <- read.fst("data/srikandi_pegawai.fst")
