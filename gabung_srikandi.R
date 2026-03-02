@@ -1,4 +1,6 @@
 library(tidyverse)
+library(googlesheets4)
+library(lubridate)
 gs4_deauth()
 
 asn_perwakilan <- fst::read.fst("data/asn_perwakilan.fst")
@@ -19,8 +21,55 @@ data_ketua <- read_sheet(
   sheet = "Ketua" 
 ) 
 
+
+
 data_srikandi <- readxl::read_excel("data/data_srikandi.xlsx") |>
-  filter(Pengirim %in% data_anggota$Nama)
+  filter(Pengirim %in% data_anggota$Nama) |>
+  mutate(
+    # 1. Hapus Nama Hari dan Koma
+    tanggal_string = str_remove(`Tanggal Naskah`, "^.*, "),
+    
+    # 2. Ubah ke objek Date (dmy = day month year)
+    `Tanggal Naskah` = dmy(tanggal_string),
+    # 
+    # # 3. (Opsional) Format ulang tampilannya jika ingin "27-02-2026"
+    # tanggal_final = format(tanggal_date, "%d-%m-%Y")
+    # 1. Bersihkan teks "Nama Hari, " dan " pukul "
+    Tanggal = Tanggal |> 
+      str_remove("^.*, ") |> 
+      str_remove(" pukul "),
+    
+    # 2. Ubah ke format Date-Time (dmy_hm = day month year hour minute)
+    Tanggal = dmy_hm(Tanggal),
+    
+    # 3. Ambil tanggalnya saja (tanpa jam)
+    Tanggal = as.Date(Tanggal)
+  ) |> 
+  # Hapus kolom bantuan jika tidak diperlukan lagi
+  select(-tanggal_string)
+
+View(
+  head(
+    data_srikandi
+  )
+)
+
+View(
+  data_srikandi |>
+    filter(`Nomor Naskah` == "061/RC.01/J31/2026") |>
+    mutate(
+      # 1. Bersihkan teks "Nama Hari, " dan " pukul "
+      Tanggal = Tanggal |> 
+        str_remove("^.*, ") |> 
+        str_remove(" pukul "),
+      
+      # 2. Ubah ke format Date-Time (dmy_hm = day month year hour minute)
+      Tanggal = dmy_hm(Tanggal),
+      
+      # 3. Ambil tanggalnya saja (tanpa jam)
+      Tanggal = as.Date(Tanggal)
+    )
+)
 
 penyelesaian_disposisi <- data_srikandi |>
   filter(Jenis == "DISPOSISI SELESAI") |>

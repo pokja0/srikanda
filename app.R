@@ -289,6 +289,10 @@ server <- function(input, output, session) {
         colGroup(name = "Tindaklanjut Surat", columns = c("Jumlah Sudah Tindaklanjut", "Jumlah Belum Tindaklanjut", "Persen Tindaklanjut"))
       ),
       bordered = TRUE, striped = TRUE, highlight = TRUE,searchable = T,
+      pagination = FALSE,
+      # virtual = TRUE,
+      height = 700,
+      #showPagination = T,
       theme = reactableTheme(
         highlightColor = "#99ccff"  # Biru muda untuk hover
       )
