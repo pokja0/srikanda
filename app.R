@@ -88,6 +88,89 @@ ui <- page_navbar(
             echarts4rOutput("scatter_plot")
           )
         )
+      ),
+      nav_panel(
+        "Penjelasan",
+        titlePanel(
+          h1("Metodologi Perhitungan Skor Aktivitas Srikandi", 
+             style = "color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px;")
+        ),
+        
+        # Container utama
+        div(
+          style = "max-width: 900px; margin: auto; padding: 20px;",
+          
+          # Box pendahuluan
+          wellPanel(
+            style = "background-color: #f8f9fa; border-left: 5px solid #3498db;",
+            h4("Pendahuluan", style = "color: #2c3e50; margin-top: 0;"),
+            p("Untuk mengukur tingkat keaktifan dan ketepatan pengguna dalam mengelola surat di aplikasi Srikandi, 
+        kami menggunakan sebuah indikator kuantitatif yang disebut ", 
+              strong("Skor Aktivitas Srikandi"), 
+              ". Skor ini memberikan gambaran komprehensif tentang perilaku pengguna, dengan memberikan bobot lebih 
+        pada tindakan proaktif dan memberikan pengurangan (penalti) atas keterlambatan atau kelalaian.")
+          ),
+          
+          br(),
+          
+          # Box rumus
+          wellPanel(
+            style = "background-color: #ebf5fb; border: 1px solid #3498db;",
+            h4("Rumus Perhitungan", style = "color: #2c3e50; margin-top: 0;"),
+            
+            # Rumus dalam box terpisah
+            div(
+              style = "background-color: white; padding: 15px; border-radius: 5px; font-family: 'Courier New'; 
+                 border: 1px solid #bdc3c7; text-align: center;",
+              HTML("Skor Aktivitas Srikandi = <strong>(Jumlah Surat Masuk × 0.1) + (Jumlah Sudah Baca × 0.3) + 
+             (Jumlah Sudah Tindaklanjut × 0.6) - (Jumlah Belum Baca × 0.15) - (Jumlah Belum Tindaklanjut × 0.3)</strong>")
+            ),
+            
+            br(),
+            p(em("Nilai akhir dari perhitungan ini kemudian akan dibulatkan hingga dua angka di belakang koma (desimal) 
+            untuk memudahkan pembacaan dan perbandingan."), style = "font-size: 0.9em; color: #7f8c8d;")
+          ),
+          
+          br(),
+          
+          # Box penjelasan komponen
+          h4("Penjelasan Komponen dan Bobot", style = "color: #2c3e50;"),
+          p("Setiap komponen dalam rumus ini dipilih untuk merepresentasikan tahapan penting dalam alur kerja surat. 
+      Bobot yang diberikan mencerminkan seberapa penting suatu tindakan dalam menentukan skor akhir."),
+          
+          # Tabel dengan styling
+          div(
+            style = "margin: 20px 0; overflow-x: auto;",
+            tableOutput("komponen_table")
+          ),
+          
+          br(),
+          
+          # Box ringkasan
+          wellPanel(
+            style = "background-color: #e8f5e9; border-left: 5px solid #27ae60;",
+            h4("Ringkasan", style = "color: #2c3e50; margin-top: 0;"),
+            
+            p(strong("Secara sederhana, Skor Aktivitas Srikandi adalah sebuah nilai yang dihitung dengan cara:")),
+            
+            tags$ul(
+              tags$li(HTML("<strong>Menjumlahkan</strong> poin dari setiap surat yang berhasil diproses 
+                (membaca dan menindaklanjuti), dengan bobot lebih besar pada proses 
+                <strong>tindak lanjut</strong>.")),
+              tags$li(HTML("<strong>Mengurangkan</strong> poin untuk setiap surat yang terbengkalai 
+                (belum dibaca atau belum ditindaklanjuti), dengan pengurangan terbesar pada surat 
+                yang sudah dibaca tapi <strong>tidak/belum ditindaklanjuti</strong>."))
+            ),
+            
+            p("Dengan demikian, skor ini tidak hanya mengukur kuantitas, tetapi juga kualitas dan ketepatan waktu 
+    dalam pengelolaan surat. Skor yang tinggi mencerminkan pengguna yang responsif, aktif, dan efektif 
+    dalam menyelesaikan alur kerja surat mereka di Srikandi."),
+            # Baris credit untuk Deepseek AI
+            br(),
+            p(em("Disusun oleh Deepseek AI"), 
+              style = "text-align: left; font-size: 0.85em; color: #7f8c8d; border-top: 1px dashed #a5d6a7; padding-top: 10px; margin-bottom: 0;")
+          )
+        )
       )
     )
   ),
@@ -221,6 +304,22 @@ server <- function(input, output, session) {
       write_xlsx(srikandi_pegawai, file)
     }
   )
+  
+  # Membuat tabel komponen di server
+  output$komponen_table <- renderTable({
+    data.frame(
+      Komponen = c("Jumlah Surat Masuk", "Jumlah Sudah Baca", "Jumlah Sudah Tindaklanjut", 
+                   "Jumlah Belum Baca", "Jumlah Belum Tindaklanjut"),
+      Bobot = c("+0,1", "+0,3", "+0,6", "-0,15", "-0,3"),
+      Penjelasan = c(
+        "Dasar perhitungan, merepresentasikan volume pekerjaan.",
+        "Menunjukkan pengguna telah merespons dan mengetahui isi surat.",
+        "Inti dari produktivitas - telah mengambil aksi nyata. Bobot tertinggi.",
+        "Penalti untuk keterlambatan merespons.",
+        "Penalti terbesar - menunjukkan hambatan dalam penyelesaian pekerjaan."
+      )
+    )
+  }, striped = TRUE, hover = TRUE, bordered = TRUE, align = "lcc")
   
   output$histogram_baca <- renderEcharts4r({
     #df_final_srikandi = df_final_srikandi
