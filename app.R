@@ -274,7 +274,6 @@ server <- function(input, output, session) {
         NIP = colDef(align = "left",
                      aggregate = "unique"),
         `Jumlah Surat Masuk` = colDef(aggregate = "sum"),
-        Bulan = colDef(aggregate = "unique"),
         `Jumlah Sudah Baca` = colDef(name = "Sudah", headerStyle = list(backgroundColor = "#f4de79"), aggregate = "sum"),
         `Jumlah Belum Baca` = colDef(name = "Belum", headerStyle = list(backgroundColor = "#f4de79"), aggregate = "sum"),
         `Persen Baca` = colDef(name = "Persentase (%)", 

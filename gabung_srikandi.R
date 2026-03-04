@@ -250,7 +250,7 @@ group_by(Nama, Bulan) %>%
 
 df_final_srikandi <- df_final_srikandi |>
   filter(!Nama %in% c("REZKY MURWANTO, S.Kom., MPH.", "SUKADAMAI LAMPUGO, S.Sos")) |>
-  select(Nama, NIP, `Jumlah Surat Masuk`, Bulan,
+  select(Nama, NIP, Bulan, `Jumlah Surat Masuk`,
          `Jumlah Sudah Baca`, `Jumlah Belum Baca`, `Persen Baca`, 
          `Jumlah Sudah Tindaklanjut`, `Jumlah Belum Tindaklanjut`, `Persen Tindaklanjut`, 
          `Skor Aktivitas Srikandi`)
