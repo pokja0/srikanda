@@ -293,7 +293,8 @@ server <- function(input, output, session) {
                                        format = colFormat(suffix = "%"),
                                        headerStyle = list(backgroundColor = "#99ccff"),
                                        aggregate = "mean"
-                                       )
+                                       ),
+        `Skor Aktivitas Srikandi` = colDef(aggregate = "sum")
       ),
       columnGroups = list(
         colGroup(name = "Baca Surat", 
