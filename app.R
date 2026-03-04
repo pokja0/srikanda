@@ -265,28 +265,46 @@ server <- function(input, output, session) {
   output$skor_srikandi_pegawai <- renderReactable({
     reactable(
       srikandi_pegawai,
+      groupBy = "Nama",
       defaultColDef = colDef(
         align = "center"
       ),
       columns = list(
         Nama = colDef(align = "left"),
-        NIP = colDef(align = "left"),
-        `Jumlah Sudah Baca` = colDef(name = "Sudah"),
-        `Jumlah Belum Baca` = colDef(name = "Belum"),
+        NIP = colDef(align = "left",
+                     aggregate = "unique"),
+        `Jumlah Surat Masuk` = colDef(aggregate = "sum"),
+        Bulan = colDef(aggregate = "unique"),
+        `Jumlah Sudah Baca` = colDef(name = "Sudah", headerStyle = list(backgroundColor = "#f4de79"), aggregate = "sum"),
+        `Jumlah Belum Baca` = colDef(name = "Belum", headerStyle = list(backgroundColor = "#f4de79"), aggregate = "sum"),
         `Persen Baca` = colDef(name = "Persentase (%)", 
                                style = color_scales(srikandi_pegawai, colors = c("#F44336", "#4CAF50")), 
-                               format = colFormat(suffix = "%")),
+                               format = colFormat(suffix = "%"),
+                               headerStyle = list(backgroundColor = "#f4de79"),
+                               aggregate = "mean"),
         #`Persen Belum Baca` = colDef(name = "% Belum", style = color_scales(srikandi_pegawai)),
-        `Jumlah Sudah Tindaklanjut` = colDef(name = "Sudah"),
-        `Jumlah Belum Tindaklanjut` = colDef(name = "Belum"),
+        `Jumlah Sudah Tindaklanjut` = colDef(name = "Sudah", 
+                                             headerStyle = list(backgroundColor = "#99ccff"),
+                                             aggregate = "sum"),
+        `Jumlah Belum Tindaklanjut` = colDef(name = "Belum", 
+                                             headerStyle = list(backgroundColor = "#99ccff"),
+                                             aggregate = "sum"),
         `Persen Tindaklanjut` = colDef(name = "Persentase (%)",
                                        style = color_scales(srikandi_pegawai, colors = c("#F44336", "#4CAF50")), 
-                                       format = colFormat(suffix = "%"))
-        #`Persen Belum Tindaklanjut` = colDef(name = "% Belum")
+                                       format = colFormat(suffix = "%"),
+                                       headerStyle = list(backgroundColor = "#99ccff"),
+                                       aggregate = "mean"
+                                       )
       ),
       columnGroups = list(
-        colGroup(name = "Baca Surat", columns = c("Jumlah Sudah Baca", "Jumlah Belum Baca", "Persen Baca")),
-        colGroup(name = "Tindaklanjut Surat", columns = c("Jumlah Sudah Tindaklanjut", "Jumlah Belum Tindaklanjut", "Persen Tindaklanjut"))
+        colGroup(name = "Baca Surat", 
+                 columns = c("Jumlah Sudah Baca", "Jumlah Belum Baca", "Persen Baca"), 
+                 headerStyle = list(backgroundColor = "#f4de79")
+                ),
+        colGroup(name = "Tindaklanjut Surat", 
+                 columns = c("Jumlah Sudah Tindaklanjut", "Jumlah Belum Tindaklanjut", "Persen Tindaklanjut"),
+                 headerStyle = list(backgroundColor = "#99ccff")
+                )
       ),
       bordered = TRUE, striped = TRUE, highlight = TRUE,searchable = T,
       pagination = FALSE,

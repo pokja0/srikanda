@@ -1,6 +1,7 @@
 library(tidyverse)
 library(googlesheets4)
 library(lubridate)
+Sys.setlocale("LC_TIME", "Indonesian")
 gs4_deauth()
 
 asn_perwakilan <- fst::read.fst("data/asn_perwakilan.fst")
@@ -211,8 +212,16 @@ final_srikandi <- final_srikandi |>
   )
   )
 
+final_srikandi <- final_srikandi |>
+  mutate(
+    # Mengambil nama bulan (Februari)
+    Bulan = month(`Tanggal Naskah`, label = TRUE, abbr = FALSE),
+    Tahun = year(`Tanggal Naskah`)
+  ) |>
+  filter(Tahun == 2026)
+
 df_final_srikandi <- final_srikandi |>
-group_by(Nama) %>%
+group_by(Nama, Bulan) %>%
   summarise(
     `Jumlah Surat Masuk` = n(),
     `Jumlah Sudah Baca` = sum(`Status Baca` == "SUDAH BACA"),
@@ -240,13 +249,14 @@ group_by(Nama) %>%
   )
 
 df_final_srikandi <- df_final_srikandi |>
-  filter(Nama != c("REZKY MURWANTO, S.Kom., MPH.", "SUKADAMAI LAMPUGO, S.Sos")) |>
-  select(Nama, NIP, `Jumlah Surat Masuk`, 
+  filter(!Nama %in% c("REZKY MURWANTO, S.Kom., MPH.", "SUKADAMAI LAMPUGO, S.Sos")) |>
+  select(Nama, NIP, `Jumlah Surat Masuk`, Bulan,
          `Jumlah Sudah Baca`, `Jumlah Belum Baca`, `Persen Baca`, 
          `Jumlah Sudah Tindaklanjut`, `Jumlah Belum Tindaklanjut`, `Persen Tindaklanjut`, 
          `Skor Aktivitas Srikandi`)
 
 fst::write_fst(df_final_srikandi, "data/srikandi_pegawai.fst")
+fst::write_fst(final_srikandi, "data/srikandi_surat.fst")
 
 ###batas
 # Cek duplikasi di tabel disposisi
