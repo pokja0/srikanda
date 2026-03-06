@@ -66,7 +66,7 @@ ui <- page_navbar(
         "Tabel",
         # card_title("Tabel Rekap Aktivitas Srikandi Pegawai"),
         h1("Tabel Rekap Aktivitas Srikandi Pegawai", style="text-align: center;"),
-        h6("Sumber Data: srikandi.arsip.go.id (diakses tanggal 28 Februari 2026)", style="text-align: center;"),
+        h6("Sumber Data: srikandi.arsip.go.id (diakses tanggal 3 Maret 2026)", style="text-align: center;"),
         layout_columns(
           col_widths = 2,
           downloadButton("download_excel_srikandi_pegawai", "Download Excel")
@@ -243,7 +243,7 @@ server <- function(input, output, session) {
       decimal.mark = ","
     )
   })
-  output$tanggal_scraping <- renderText({ "28 Februari 2026"})
+  output$tanggal_scraping <- renderText({ "3 Maret 2026"})
   
   output$surat_terbaca <- renderText({ 
     paste0(comma(
@@ -278,7 +278,7 @@ server <- function(input, output, session) {
         `Jumlah Belum Baca` = colDef(name = "Belum", headerStyle = list(backgroundColor = "#f4de79"), aggregate = "sum"),
         `Persen Baca` = colDef(name = "Persentase (%)", 
                                style = color_scales(srikandi_pegawai, colors = c("#F44336", "#4CAF50")), 
-                               format = colFormat(suffix = "%"),
+                               format = colFormat(suffix = "%", digits = 2),
                                headerStyle = list(backgroundColor = "#f4de79"),
                                aggregate = "mean"),
         #`Persen Belum Baca` = colDef(name = "% Belum", style = color_scales(srikandi_pegawai)),
@@ -290,7 +290,7 @@ server <- function(input, output, session) {
                                              aggregate = "sum"),
         `Persen Tindaklanjut` = colDef(name = "Persentase (%)",
                                        style = color_scales(srikandi_pegawai, colors = c("#F44336", "#4CAF50")), 
-                                       format = colFormat(suffix = "%"),
+                                       format = colFormat(suffix = "%", digits = 2),
                                        headerStyle = list(backgroundColor = "#99ccff"),
                                        aggregate = "mean"
                                        ),

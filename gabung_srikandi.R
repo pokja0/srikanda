@@ -23,7 +23,6 @@ data_ketua <- read_sheet(
 ) 
 
 
-
 data_srikandi <- readxl::read_excel("data/data_srikandi.xlsx") |>
   filter(Pengirim %in% data_anggota$Nama) |>
   mutate(
