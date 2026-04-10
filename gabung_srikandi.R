@@ -50,28 +50,28 @@ data_srikandi <- readxl::read_excel("data/data_srikandi_april.xlsx") |>
   select(-tanggal_string) |>
   filter(`Tanggal Naskah` > as.Date("2026-03-31"))
 
-View(
-  head(
-    data_srikandi
-  )
-)
-
-View(
-  data_srikandi |>
-    filter(`Nomor Naskah` == "061/RC.01/J31/2026") |>
-    mutate(
-      # 1. Bersihkan teks "Nama Hari, " dan " pukul "
-      Tanggal = Tanggal |> 
-        str_remove("^.*, ") |> 
-        str_remove(" pukul "),
-      
-      # 2. Ubah ke format Date-Time (dmy_hm = day month year hour minute)
-      Tanggal = dmy_hm(Tanggal),
-      
-      # 3. Ambil tanggalnya saja (tanpa jam)
-      Tanggal = as.Date(Tanggal)
-    )
-)
+# View(
+#   head(
+#     data_srikandi
+#   )
+# )
+# 
+# View(
+#   data_srikandi |>
+#     filter(`Nomor Naskah` == "061/RC.01/J31/2026") |>
+#     mutate(
+#       # 1. Bersihkan teks "Nama Hari, " dan " pukul "
+#       Tanggal = Tanggal |> 
+#         str_remove("^.*, ") |> 
+#         str_remove(" pukul "),
+#       
+#       # 2. Ubah ke format Date-Time (dmy_hm = day month year hour minute)
+#       Tanggal = dmy_hm(Tanggal),
+#       
+#       # 3. Ambil tanggalnya saja (tanpa jam)
+#       Tanggal = as.Date(Tanggal)
+#     )
+# )
 
 penyelesaian_disposisi <- data_srikandi |>
   filter(Jenis == "DISPOSISI SELESAI") |>
@@ -199,19 +199,19 @@ final_srikandi <- final_srikandi |>
   rename(`Status Baca` = Keterangan, `Status Tindaklanjut` =  `Jenis Penerima Dispo`) |>
   mutate(`Status Tindaklanjut` = case_when(
     Nama == "REZKY MURWANTO, S.Kom., MPH." ~ "DISPOSISI SELESAI",
-    #Nama == "ASHARI RAMADHAN, S.Stat" ~ "DISPOSISI SELESAI",
+    Nama == "SUNARTI, S.KM" ~ "DISPOSISI SELESAI",
     is.na(`Status Tindaklanjut`) ~ "DISPOSISI BELUM SELESAI",
     `Status Tindaklanjut` == "DISPOSISI SELESAI" ~ "DISPOSISI SELESAI",
     TRUE ~ "DISPOSISI BELUM SELESAI"
     )
-  ) # |>
-  # mutate(`Status Baca` = case_when(
-  #   Nama == "ASHARI RAMADHAN, S.Stat" ~ "SUDAH BACA",
-  #   `Status Baca` == "SUDAH BACA" ~ "SUDAH BACA",
-  #   `Status Baca` == "BELUM BACA" ~ "BELUM BACA",
-  #   TRUE ~ "DISPOSISI BELUM SELESAI"
-  # )
-  # )
+  ) |>
+  mutate(`Status Baca` = case_when(
+    Nama == "SUNARTI, S.KM" ~ "SUDAH BACA",
+    `Status Baca` == "SUDAH BACA" ~ "SUDAH BACA",
+    `Status Baca` == "BELUM BACA" ~ "BELUM BACA",
+    TRUE ~ "DISPOSISI BELUM SELESAI"
+  )
+   )
 
 final_srikandi <- final_srikandi |>
   mutate(
