@@ -23,8 +23,9 @@ data_ketua <- read_sheet(
 ) 
 
 
-data_srikandi <- readxl::read_excel("data/data_srikandi.xlsx") |>
-  filter(Pengirim %in% data_anggota$Nama) |>
+data_srikandi <- readxl::read_excel("data/data_srikandi_april.xlsx") |>
+  filter(Pengirim %in% data_anggota$Nama,
+         Jenis %in% c("DISPOSISI", "DISPOSISI SELESAI")) |>
   mutate(
     # 1. Hapus Nama Hari dan Koma
     tanggal_string = str_remove(`Tanggal Naskah`, "^.*, "),
@@ -46,7 +47,8 @@ data_srikandi <- readxl::read_excel("data/data_srikandi.xlsx") |>
     Tanggal = as.Date(Tanggal)
   ) |> 
   # Hapus kolom bantuan jika tidak diperlukan lagi
-  select(-tanggal_string)
+  select(-tanggal_string) |>
+  filter(`Tanggal Naskah` > as.Date("2026-03-31"))
 
 View(
   head(
@@ -197,19 +199,19 @@ final_srikandi <- final_srikandi |>
   rename(`Status Baca` = Keterangan, `Status Tindaklanjut` =  `Jenis Penerima Dispo`) |>
   mutate(`Status Tindaklanjut` = case_when(
     Nama == "REZKY MURWANTO, S.Kom., MPH." ~ "DISPOSISI SELESAI",
-    Nama == "ASHARI RAMADHAN, S.Stat" ~ "DISPOSISI SELESAI",
+    #Nama == "ASHARI RAMADHAN, S.Stat" ~ "DISPOSISI SELESAI",
     is.na(`Status Tindaklanjut`) ~ "DISPOSISI BELUM SELESAI",
     `Status Tindaklanjut` == "DISPOSISI SELESAI" ~ "DISPOSISI SELESAI",
     TRUE ~ "DISPOSISI BELUM SELESAI"
     )
-  ) |>
-  mutate(`Status Baca` = case_when(
-    Nama == "ASHARI RAMADHAN, S.Stat" ~ "SUDAH BACA",
-    `Status Baca` == "SUDAH BACA" ~ "SUDAH BACA",
-    `Status Baca` == "BELUM BACA" ~ "BELUM BACA",
-    TRUE ~ "DISPOSISI BELUM SELESAI"
-  )
-  )
+  ) # |>
+  # mutate(`Status Baca` = case_when(
+  #   Nama == "ASHARI RAMADHAN, S.Stat" ~ "SUDAH BACA",
+  #   `Status Baca` == "SUDAH BACA" ~ "SUDAH BACA",
+  #   `Status Baca` == "BELUM BACA" ~ "BELUM BACA",
+  #   TRUE ~ "DISPOSISI BELUM SELESAI"
+  # )
+  # )
 
 final_srikandi <- final_srikandi |>
   mutate(
