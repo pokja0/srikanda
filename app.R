@@ -264,7 +264,8 @@ server <- function(input, output, session) {
   # Plot dummy
   output$skor_srikandi_pegawai <- renderReactable({
     reactable(
-      srikandi_pegawai,
+      srikandi_pegawai |>
+        select(-NIP),
       #groupBy = "Nama",
       defaultColDef = colDef(
         align = "center"
