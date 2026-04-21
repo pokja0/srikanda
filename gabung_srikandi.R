@@ -6,6 +6,7 @@ gs4_deauth()
 
 asn_perwakilan <- fst::read.fst("data/asn_perwakilan.fst")
 
+
 # asn_perwakilan <- asn_perwakilan |>
 #   mutate(`Nama Lengkap` = if_else(`Nama Lengkap` == "EDWIN BARA, S.Psi, M.A.P, M.Psi., Psikolog", "EDWIN BARA, S.Psi, M.A.P", `Nama Lengkap`))
 # 
