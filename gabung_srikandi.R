@@ -24,7 +24,7 @@ data_ketua <- read_sheet(
 ) 
 
 
-data_srikandi <- readxl::read_excel("data/data_srikandi_april.xlsx") |>
+data_srikandi <- readxl::read_excel("data/data_srikandi_27april.xlsx") |>
   filter(Pengirim %in% data_anggota$Nama,
          Jenis %in% c("DISPOSISI", "DISPOSISI SELESAI")) |>
   mutate(
