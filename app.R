@@ -18,6 +18,23 @@ library(purrr)
 srikandi_surat <- read.fst("data/srikandi_surat.fst")
 srikandi_pegawai <- read.fst("data/srikandi_pegawai.fst")
 
+rekap <- srikandi_pegawai |>
+  group_by(Nama) %>%
+  summarise(
+    `Jumlah Surat Masuk` = sum(`Jumlah Surat Masuk`),
+    `Jumlah Sudah Baca` = sum(`Jumlah Sudah Baca`),
+    `Jumlah Belum Baca` = sum(`Jumlah Belum Baca`),
+    `Jumlah Sudah Tindaklanjut` = sum(`Jumlah Sudah Tindaklanjut`), # Asumsi status selesai
+    `Jumlah Belum Tindaklanjut` = sum( `Jumlah Belum Tindaklanjut`), # Asumsi status selesai
+    .groups = 'drop'
+  ) %>%
+  mutate(
+    `Persen Baca` = round((`Jumlah Sudah Baca` / `Jumlah Surat Masuk`) * 100, 2),
+    # `Persen Belum Baca` = paste0(round((`Jumlah Belum Baca` / `Jumlah Surat Masuk`) * 100), "%"),
+    `Persen Tindaklanjut` = round((`Jumlah Sudah Tindaklanjut` / `Jumlah Surat Masuk`) * 100, 2),
+    #  `Persen Belum Tindaklanjut` = paste0(100 - round((`Jumlah Sudah Tindaklanjut` / `Jumlah Surat Masuk`) * 100), "%")
+  ) 
+
 # Tema kustom (opsional)
 my_theme <- bs_theme(
   bootswatch = "cosmo",  # bisa diganti: "darkly", "cosmo", dll.
@@ -67,7 +84,7 @@ ui <- page_navbar(
         "Tabel",
         # card_title("Tabel Rekap Aktivitas Srikandi Pegawai"),
         h1("Tabel Rekap Aktivitas Srikandi Pegawai", style="text-align: center;"),
-        h6("Sumber Data: srikandi.arsip.go.id (diakses tanggal 7 Mei 2026)", style="text-align: center;"),
+        h6("Sumber Data: srikandi.arsip.go.id (diakses tanggal 14 Juli 2026)", style="text-align: center;"),
         layout_columns(
           col_widths = 2,
           downloadButton("download_excel_srikandi_pegawai", "Download Excel")
@@ -175,63 +192,63 @@ ui <- page_navbar(
         )
       )
     )
-  ),
+  )#,
 
   #Menu kedua
-  nav_panel(
-    title = "Menu Permintaan Data",
-    h2("Daftar Permintaan Data", style="text-align: center;"),
-    br(),
-    fluidRow(
-      column(
-        4,
-        value_box(
-          title = "Jumlah Permintaan Data",
-          textOutput("jumlah_permintaan_data"),
-          showcase = bs_icon("people-fill"),
-          theme = "primary"
-        )
-      ),
-      column(
-        4,
-        value_box(
-          title = "Telah Ditindaklanjuti",
-          textOutput("jumlah_tl_pm"),
-          showcase = bs_icon("emoji-heart-eyes-fill"),
-          theme = "primary"
-        )
-      ),
-      column(
-        4,
-        value_box(
-          title = "Belum Ditindaklanjuti",
-          textOutput("jumlah_belum_tl_pm"),
-          showcase = bs_icon("emoji-tear-fill"),
-          theme = "danger"
-        )
-      )
-    ),
-    navset_card_underline(
-      title = "Klik ✔ ",
-      nav_panel(
-        "Tabel",
-        br(),
-        layout_columns(
-          col_widths = 2,
-          downloadButton("download_excel_pd", "Download Excel")
-        ),
-        card(
-          reactableOutput("tabel_permintaan_data")
-        )
-      ),
-      nav_panel(
-        "Grafik",
-        card(full_screen = T,
-             echarts4rOutput("grafik_pd")
-        )
-      ),
-    )
-  )
+  # nav_panel(
+  #   title = "Menu Permintaan Data",
+  #   h2("Daftar Permintaan Data", style="text-align: center;"),
+  #   br(),
+  #   fluidRow(
+  #     column(
+  #       4,
+  #       value_box(
+  #         title = "Jumlah Permintaan Data",
+  #         textOutput("jumlah_permintaan_data"),
+  #         showcase = bs_icon("people-fill"),
+  #         theme = "primary"
+  #       )
+  #     ),
+  #     column(
+  #       4,
+  #       value_box(
+  #         title = "Telah Ditindaklanjuti",
+  #         textOutput("jumlah_tl_pm"),
+  #         showcase = bs_icon("emoji-heart-eyes-fill"),
+  #         theme = "primary"
+  #       )
+  #     ),
+  #     column(
+  #       4,
+  #       value_box(
+  #         title = "Belum Ditindaklanjuti",
+  #         textOutput("jumlah_belum_tl_pm"),
+  #         showcase = bs_icon("emoji-tear-fill"),
+  #         theme = "danger"
+  #       )
+  #     )
+  #   ),
+  #   navset_card_underline(
+  #     title = "Klik ✔ ",
+  #     nav_panel(
+  #       "Tabel",
+  #       br(),
+  #       layout_columns(
+  #         col_widths = 2,
+  #         downloadButton("download_excel_pd", "Download Excel")
+  #       ),
+  #       card(
+  #         reactableOutput("tabel_permintaan_data")
+  #       )
+  #     ),
+  #     nav_panel(
+  #       "Grafik",
+  #       card(full_screen = T,
+  #            echarts4rOutput("grafik_pd")
+  #       )
+  #     ),
+  #   )
+  # )
 )
 
 server <- function(input, output, session) {
@@ -244,11 +261,11 @@ server <- function(input, output, session) {
       decimal.mark = ","
     )
   })
-  output$tanggal_scraping <- renderText({ "7 Mei 2026 - Pukul 09.00 WITA"})
+  output$tanggal_scraping <- renderText({ "14 Juli 2026 - Pukul 09.00 WITA"})
   
   output$surat_terbaca <- renderText({ 
     paste0(comma(
-      median(srikandi_pegawai$`Persen Baca`, na.rm = T),
+      median(rekap$`Persen Baca`, na.rm = T),
       big.mark = ".",
       decimal.mark = ","
     ), "%")
@@ -256,7 +273,7 @@ server <- function(input, output, session) {
   
   output$surat_ditl <- renderText({ 
     paste0(comma(
-      median(srikandi_pegawai$`Persen Tindaklanjut`, na.rm = T),
+      median(rekap$`Persen Tindaklanjut`, na.rm = T),
       big.mark = ".",
       decimal.mark = ","
     ), "%")

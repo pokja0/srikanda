@@ -4,7 +4,13 @@ library(lubridate)
 Sys.setlocale("LC_TIME", "Indonesian")
 gs4_deauth()
 
-asn_perwakilan <- fst::read.fst("data/asn_perwakilan.fst")
+asn_perwakilan <- fst::read.fst("data/asn_perwakilan.fst") |>
+  add_row(
+    No = 69,
+    `NIP Baru` = "196912311998032040",
+    `Nama Lengkap` = "WAHIDAH P, S.Sos, M.Si",
+    `Jenis Pegawai` = "PNS"
+  )
 
 
 # asn_perwakilan <- asn_perwakilan |>
@@ -24,7 +30,7 @@ data_ketua <- read_sheet(
 ) 
 
 
-data_srikandi <- readxl::read_excel("data/data_srikandi_april - Copy.xlsx") |>
+data_srikandi <- readxl::read_excel("I:/Datin/Project/srikanda/data/arsip/14 juli/data_srikandi_14_juli_full.xlsx") |>
   filter(Pengirim %in% data_anggota$Nama,
          Jenis %in% c("DISPOSISI", "DISPOSISI SELESAI")) |>
   mutate(
@@ -251,7 +257,7 @@ group_by(Nama, Bulan) %>%
   )
 
 df_final_srikandi <- df_final_srikandi |>
-  filter(!Nama %in% c("REZKY MURWANTO, S.Kom., MPH.", "SUKADAMAI LAMPUGO, S.Sos")) |>
+  filter(!Nama %in% c("WAHIDAH P, S.Sos, M.Si", "REZKY MURWANTO, S.Kom., MPH.", "SUKADAMAI LAMPUGO, S.Sos", "HERNAWATI, S.Sos., M.A.P")) |>
   select(Nama, NIP, Bulan, `Jumlah Surat Masuk`,
          `Jumlah Sudah Baca`, `Jumlah Belum Baca`, `Persen Baca`, 
          `Jumlah Sudah Tindaklanjut`, `Jumlah Belum Tindaklanjut`, `Persen Tindaklanjut`, 
