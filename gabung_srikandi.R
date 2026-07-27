@@ -10,6 +10,12 @@ asn_perwakilan <- fst::read.fst("data/asn_perwakilan.fst") |>
     `NIP Baru` = "196912311998032040",
     `Nama Lengkap` = "WAHIDAH P, S.Sos, M.Si",
     `Jenis Pegawai` = "PNS"
+  ) |>
+  add_row(
+    No = 70,
+    `NIP Baru` = "198305272009012002",
+    `Nama Lengkap` = "VERAWATI, S.Psi, M.I.Kom",
+    `Jenis Pegawai` = "PNS"
   )
 
 
@@ -30,7 +36,32 @@ data_ketua <- read_sheet(
 ) 
 
 
-data_srikandi <- readxl::read_excel("I:/Datin/Project/srikanda/data/arsip/14 juli/data_srikandi_14_juli_full.xlsx") |>
+library(readxl)
+library(dplyr)
+library(purrr)
+
+# 1. Cari file yang HANYA mengandung tulisan "27 juli" dan berformat .xlsx
+daftar_file <- list.files(
+  path = "I:/Datin/Project/srikanda/data", 
+  pattern = ".*27_juli.*\\.xlsx$", # Mencari "27 juli" di nama file
+  full.names = TRUE,
+  ignore.case = TRUE              # Mengabaikan huruf besar/kecil
+)
+
+# 2. Cek apakah file ditemukan
+if (length(daftar_file) == 0) {
+  message("Tidak ditemukan file yang cocok!")
+} else {
+  # 3. Baca dan gabungkan file yang cocok saja
+  data_gabungan <- daftar_file %>% 
+    map_dfr(read_excel)
+  
+  print(paste("Berhasil menggabungkan", length(daftar_file), "file."))
+}
+
+writexl::write_xlsx(data_gabungan, "I:/Datin/Project/srikanda/data/arsip/27 juli 2026/data_srikandi_27_juli_full.xlsx")
+
+data_srikandi <- readxl::read_excel("I:/Datin/Project/srikanda/data/arsip/27 juli 2026/data_srikandi_27_juli_full.xlsx") |>
   filter(Pengirim %in% data_anggota$Nama,
          Jenis %in% c("DISPOSISI", "DISPOSISI SELESAI")) |>
   mutate(

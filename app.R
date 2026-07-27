@@ -84,7 +84,7 @@ ui <- page_navbar(
         "Tabel",
         # card_title("Tabel Rekap Aktivitas Srikandi Pegawai"),
         h1("Tabel Rekap Aktivitas Srikandi Pegawai", style="text-align: center;"),
-        h6("Sumber Data: srikandi.arsip.go.id (diakses tanggal 14 Juli 2026)", style="text-align: center;"),
+        h6("Sumber Data: srikandi.arsip.go.id (diakses tanggal 27 Juli 2026)", style="text-align: center;"),
         layout_columns(
           col_widths = 2,
           downloadButton("download_excel_srikandi_pegawai", "Download Excel")
@@ -261,7 +261,7 @@ server <- function(input, output, session) {
       decimal.mark = ","
     )
   })
-  output$tanggal_scraping <- renderText({ "14 Juli 2026 - Pukul 09.00 WITA"})
+  output$tanggal_scraping <- renderText({ "27 Juli 2026 - Pukul 09.00 WITA"})
   
   output$surat_terbaca <- renderText({ 
     paste0(comma(
