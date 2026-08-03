@@ -42,8 +42,8 @@ library(purrr)
 
 # 1. Cari file yang HANYA mengandung tulisan "27 juli" dan berformat .xlsx
 daftar_file <- list.files(
-  path = "I:/Datin/Project/srikanda/data", 
-  pattern = ".*27_juli.*\\.xlsx$", # Mencari "27 juli" di nama file
+  path = "I:/Datin/Project/srikanda/data/arsip/03-08-2026/", 
+  pattern = ".*srikandi.*\\.xlsx$", # Mencari "27 juli" di nama file
   full.names = TRUE,
   ignore.case = TRUE              # Mengabaikan huruf besar/kecil
 )
@@ -59,9 +59,9 @@ if (length(daftar_file) == 0) {
   print(paste("Berhasil menggabungkan", length(daftar_file), "file."))
 }
 
-writexl::write_xlsx(data_gabungan, "I:/Datin/Project/srikanda/data/arsip/27 juli 2026/data_srikandi_27_juli_full.xlsx")
+writexl::write_xlsx(data_gabungan, "I:/Datin/Project/srikanda/data/arsip/03-08-2026/data_srikandi_03_agustus_full.xlsx")
 
-data_srikandi <- readxl::read_excel("I:/Datin/Project/srikanda/data/arsip/27 juli 2026/data_srikandi_27_juli_full.xlsx") |>
+data_srikandi <- readxl::read_excel("I:/Datin/Project/srikanda/data/arsip/03-08-2026/data_srikandi_03_agustus_full.xlsx") |>
   filter(Pengirim %in% data_anggota$Nama,
          Jenis %in% c("DISPOSISI", "DISPOSISI SELESAI")) |>
   mutate(
